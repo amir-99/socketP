@@ -19,15 +19,13 @@ print("Connected")
 def msgSend(msg):
     msg = msg.encode(myFormat)
     sendLength = f'{len(msg):<{szHeader}}'.encode(myFormat)
-    print(sendLength)
-    print(len(sendLength))
     myClient.send(sendLength)
     myClient.send(msg)
     
 print ("type in your message.\ntypr (dis) to disconnect\n")
 runningStatus = True
 while runningStatus:
-    msg = input("your message")
+    msg = input("your message:\n\t")
     if len(msg):
         msgSend(msg)
         if msg == disMssg:

@@ -1,4 +1,5 @@
 import socket
+import sys
 
 szHeader = 12
 initPort = 4580
@@ -8,7 +9,11 @@ myFormat = "utf-8"
 disMssg = "dis"
 
 myClient = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-myClient.connect(myAddr)
+try:
+    myClient.connect(myAddr)
+except socket.error:
+    print(f"Unable to connect to server at {myServer}")
+    sys.exit()
 print("Connected")
 
 def msgSend(msg):
@@ -19,12 +24,11 @@ def msgSend(msg):
     myClient.send(sendLength)
     myClient.send(msg)
     
-
-msgSend("HI")
-print("Hi")
-input()
-print("aaaa")
-msgSend("asd spksdc fpj psdjc uheadopcj me")
-input()
-print("dis")
-msgSend("dis")
+print ("type in your message.\ntypr (dis) to disconnect\n")
+runningStatus = True
+while runningStatus:
+    msg = input("your message")
+    if len(msg):
+        msgSend(msg)
+        if msg == disMssg:
+            runningStatus = False

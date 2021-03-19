@@ -13,6 +13,7 @@ bndServer.bind(myAddr)
 
 connectins = list()
 address = list()
+runningThreads = list()
 
 def clientResponse(conn, addr):
     print(f"{addr} Connected.")
@@ -42,6 +43,7 @@ def runServer():
         address.append(tmpAddr)
         clntThread = threading.Thread(target=clientResponse, args=(tmpConn, tmpAddr))
         clntThread.start()
+        runningThreads.append(clntThread)
         print(f"Active Clients : {len(address)}")
 
 runServer()

@@ -10,6 +10,9 @@ myFormat = "utf-8"
 disMssg = "dis"
 
 bndServer = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+bndServer.setblocking(0)
+bndServer.settimeout(1)
+#bndServer.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
 try:
     bndServer.bind(myAddr)
 except socket.error:
@@ -26,7 +29,7 @@ def clientResponse(conn, addr):
     while rnClnt:
         try:
             msgLength = conn.recv(szHeader).decode(myFormat)
-        except socket.error:
+        except socket.error or socket.timeout:
             print(f"Unable to recive data from client at {addr}")
             rnClnt = False
             continue
@@ -34,7 +37,7 @@ def clientResponse(conn, addr):
             msgLength = int(msgLength)
             try:
                 msg = conn.recv(msgLength).decode(myFormat)
-            except socket.error:
+            except socket.error or socket.timeout:
                 print(f"Unable to recive data from client at {addr}")
                 rnClnt = False
                 continue

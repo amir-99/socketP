@@ -27,7 +27,7 @@ def msgSend(msg):
         sys.exit()
 
 
-print ("type in your message.\ntypr (dis) to disconnect\n")
+print ("type in your message.\ntype (dis) to disconnect\n")
 runningStatus = True
 while runningStatus:
     msg = input("your message:\n\t")

@@ -19,9 +19,14 @@ print("Connected")
 def msgSend(msg):
     msg = msg.encode(myFormat)
     sendLength = f'{len(msg):<{szHeader}}'.encode(myFormat)
-    myClient.send(sendLength)
-    myClient.send(msg)
-    
+    try:
+        myClient.send(sendLength)
+        myClient.send(msg)
+    except socket.error:
+        print("Unable to send data to server")
+        sys.exit()
+
+
 print ("type in your message.\ntypr (dis) to disconnect\n")
 runningStatus = True
 while runningStatus:

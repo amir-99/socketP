@@ -24,10 +24,20 @@ def clientResponse(conn, addr):
     print(f"{addr} Connected.")
     rnClnt = True
     while rnClnt:
-        msgLength = conn.recv(szHeader).decode(myFormat)
+        try:
+            msgLength = conn.recv(szHeader).decode(myFormat)
+        except socket.error:
+            print(f"Unable to recive data from client at {addr}")
+            rnClnt = False
+            continue
         if msgLength:
             msgLength = int(msgLength)
-            msg = conn.recv(msgLength).decode(myFormat)
+            try:
+                msg = conn.recv(msgLength).decode(myFormat)
+            except socket.error:
+                print(f"Unable to recive data from client at {addr}")
+                rnClnt = False
+                continue
             print(f"Message from {addr} with size of {msgLength} :")
             print("\t" + msg)
             if msg == disMssg:

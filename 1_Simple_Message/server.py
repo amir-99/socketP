@@ -11,8 +11,8 @@ disMssg = "dis"
 
 bndServer = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 bndServer.setblocking(0)
-bndServer.settimeout(1)
-#bndServer.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
+bndServer.settimeout(100)
+bndServer.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
 try:
     bndServer.bind(myAddr)
 except socket.error:
@@ -45,6 +45,8 @@ def clientResponse(conn, addr):
             print("\t" + msg)
             if msg == disMssg:
                 rnClnt = False
+            respMsg = f"recived following message : ({msg})"
+            msgSend(respMsg, conn, addr)
     conn.close()
     print(f"{addr} Disconnected.")
     address.remove(addr)
@@ -52,14 +54,30 @@ def clientResponse(conn, addr):
     print(f"Active Clients : {len(address)}")
 
 
+def msgSend(msg, connClient, addrClient):
+    msg = msg.encode(myFormat)
+    sendLength = f'{len(msg):<{szHeader}}'.encode(myFormat)
+    try:
+        connClient.send(sendLength)
+        connClient.send(msg)
+    except socket.error:
+        print(f"Unable to send data to client at : {addrClient}")
+        sys.exit()
+
+
 def runServer():
     bndServer.listen(5)
     print(f"server is running on {myServer}:{initPort}")
     while True:
-        tmpConn, tmpAddr = bndServer.accept()
+        try:
+            tmpConn, tmpAddr = bndServer.accept()
+        except socket.error:
+            print("Couldn't accept connection !")
+            sys.exit()
         connectins.append(tmpConn)
         address.append(tmpAddr)
         clntThread = threading.Thread(target=clientResponse, args=(tmpConn, tmpAddr))
+        clntThread.daemon = True
         clntThread.start()
         runningThreads.append(clntThread)
         print(f"Active Clients : {len(address)}")

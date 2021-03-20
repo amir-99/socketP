@@ -1,5 +1,6 @@
 import socket
 import threading
+import sys
 
 szHeader = 12
 initPort = 4580
@@ -9,7 +10,11 @@ myFormat = "utf-8"
 disMssg = "dis"
 
 bndServer = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-bndServer.bind(myAddr)
+try:
+    bndServer.bind(myAddr)
+except socket.error:
+    print(f"Couldn't Create the socket at {myAddr}")
+    sys.exit()
 
 connectins = list()
 address = list()

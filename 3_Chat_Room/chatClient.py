@@ -9,12 +9,14 @@ myServer = "192.168.230.136"
 myAddr = (myServer, initPort)
 myFormat = "utf-8"  #Coding format
 disMssg = "dis"     #used to dsconnect Client
+maxTimeOut = 3600   #one hour
+
 
 myClient = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
     # disable set blockin
 myClient.setblocking(False)
-    # set time out of 2 min
-myClient.settimeout(120)
+    # set time out
+myClient.settimeout(maxTimeOut)
     # make socker reusable
 myClient.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
 try:

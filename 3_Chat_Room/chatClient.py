@@ -5,7 +5,7 @@ import time
 
 szHeader = 12   # Default Header Size
 initPort = 4580     # Port number
-myServer = "192.168.230.136"
+myServer = "127.0.0.1"
 myAddr = (myServer, initPort)
 myFormat = "utf-8"  #Coding format
 disMssg = "dis"     #used to dsconnect Client
@@ -79,7 +79,4 @@ def clntRecv(conn, addr):
 rcvThread = threading.Thread(target=clntRecv, args=[myClient, myAddr])
 rcvThread.daemon = True
 rcvThread.start()
-
-name = input("your name : ")
-msgSend(name)
 clntSend()

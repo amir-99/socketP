@@ -34,9 +34,15 @@ def clientresponse(conn, addr):
     print(f"{addr} Connected.")
 
     nameingStat = False
+    msgsend("Enter Your Name : ", conn, addr)
     while not nameingStat:
         name, nameingStat = msgrcve(conn, addr)
-        names.append(name)
+        if name in names:
+            msgsend("name taken, try again", conn, addr)
+            nameingStat = False
+        else:
+            names.append(name)
+    msgsend(f"joinde succesfully as {name}.", conn, addr)
     msgBroadCast(f"{name} joined chat", conn)
     rnClnt = True
     msgStat = True

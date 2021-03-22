@@ -1,5 +1,6 @@
 import socket
 import threading
+import concurrent.futures
 import sys
 
 szHeader = 12   # Default Header Size
@@ -8,6 +9,7 @@ myServer = socket.gethostbyname(socket.gethostname())       #get host ip
 myAddr = (myServer, initPort)
 myFormat = "utf-8"  #Coding format
 disMssg = "dis"     #used to dsconnect Client
+maxConnections = 250
 
 bndServer = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
     # disable set blockin
@@ -32,6 +34,7 @@ runningThreads = list()
 #and finally send back a confirmation
 def clientresponse(conn, addr):
     print(f"{addr} Connected.")
+    msgsend("successfully connected to server\nType in your messages (dis for disconnect)", conn, addr)
     rnClnt = True
     while rnClnt:
         try:
@@ -70,27 +73,22 @@ def msgsend(msg, connClient, addrClient):
         connClient.send(msg)
     except socket.error:
         print(f"Unable to send data to client at : {addrClient}")
-        sys.exit()
 
 
 def runserver():
     bndServer.listen(5)
     print(f"server is running on {myServer}:{initPort}")
-    while True:
-        try:
-            tmpConn, tmpAddr = bndServer.accept()
-        except socket.error:
-            print("Couldn't accept connection !")
-            sys.exit()
-        connectins.append(tmpConn)
-        address.append(tmpAddr)
-        #create a thread for each client in order to run the module cocurently
-        clntThread = threading.Thread(target=clientresponse, args=(tmpConn, tmpAddr))
-        # enable daemon feature to terminate the thread with termination of main thread
-        clntThread.daemon = True
-        clntThread.start()
-        runningThreads.append(clntThread)
-        print(f"Active Clients : {len(address)}")
-
-
+    with concurrent.futures.ThreadPoolExecutor(max_workers=maxConnections) as executor:
+        while True:
+            if len(address)<maxConnections:
+                try:
+                    tmpConn, tmpAddr = bndServer.accept()
+                except socket.error:
+                    print("Couldn't accept connection !")
+                    sys.exit()
+                connectins.append(tmpConn)
+                address.append(tmpAddr)
+                thrd = executor.submit(clientresponse, tmpConn, tmpAddr)
+                runningThreads.append(thrd)
+                print(f"Active Clients : {len(address)}")
 runserver()

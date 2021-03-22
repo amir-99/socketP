@@ -5,7 +5,7 @@ import time
 
 szHeader = 12   # Default Header Size
 initPort = 4580     # Port number
-myServer = "192.168.230.136"
+myServer = "127.0.0.1"
 myAddr = (myServer, initPort)
 myFormat = "utf-8"  #Coding format
 disMssg = "dis"     #used to dsconnect Client
@@ -19,10 +19,9 @@ myClient.settimeout(120)
 myClient.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
 try:
     myClient.connect(myAddr)
-except socket.error:
+except socket.error or socket.timeout(0.01):
     print(f"Unable to connect to server at {myServer}")
     sys.exit()
-print("Connected")
 
 #Send Messages to the server!
 #send the headar then the message!
@@ -39,10 +38,9 @@ def msgSend(msg):
 
 #run client
 def clntSend():
-    print ("type in your message.\ntype (dis) to disconnect\n")
     runningStatus = True
     while runningStatus:
-        msg = input("your message:\n\t")
+        msg = input()
         if len(msg):
             msgSend(msg)
             if msg == disMssg:
@@ -78,4 +76,5 @@ def clntRecv(conn, addr):
 rcvThread = threading.Thread(target=clntRecv, args=[myClient, myAddr])
 rcvThread.daemon = True
 rcvThread.start()
+print("Waiting for server response !")
 clntSend()

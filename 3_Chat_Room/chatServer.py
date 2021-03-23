@@ -1,5 +1,6 @@
 import socket
 import threading
+import concurrent.futures
 import sys
 
 szHeader = 12   # Default Header Size
@@ -27,12 +28,15 @@ except socket.error or socket.timeout:
 connectins = list()
 address = list()
 names = list()
-runningThreads = list()
 
 
 def clientresponse(conn, addr):
     print(f"{addr} Connected.")
-
+    msgsend('''successfully joind the chat
+    type in your messages
+    dis for disconnect
+    --->
+    ''', conn, addr)
     nameingStat = False
     msgsend("Enter Your Name : ", conn, addr)
     while not nameingStat:
@@ -107,26 +111,35 @@ def msgBroadCast(msg, connClient):
                 print(f"Unable to send data to client at : {address[index]}")
                 sys.exit()
 
+def serverhandle(executor):
+    handle = input()
+    if handle == 'ls':
+        listconnections()
+    else:
+        pass
+
+def listconnections():
+    print(f"currently {len(address)} active connections.")
+    for name, add in zip(names, address):
+        print(f"{name} on {add}")
 
 
 def runserver():
     bndServer.listen(5)
     print(f"server is running on {myServer}:{initPort}")
-    while True:
-        try:
-            tmpConn, tmpAddr = bndServer.accept()
-        except socket.error:
-            print("Couldn't accept connection !")
-            sys.exit()
-        connectins.append(tmpConn)
-        address.append(tmpAddr)
-        #create a thread for each client in order to run the module cocurently
-        clntThread = threading.Thread(target=clientresponse, args=(tmpConn, tmpAddr))
-        # enable daemon feature to terminate the thread with termination of main thread
-        clntThread.daemon = True
-        clntThread.start()
-        runningThreads.append(clntThread)
-        print(f"Active Clients : {len(address)}")
+    with concurrent.futures.ThreadPoolExecutor(max_workers=250) as executor:
+        executor.submit(serverhandle, executor)
+        while True:
+            if len(address)<250:
+                try:
+                    tmpConn, tmpAddr = bndServer.accept()
+                except socket.error:
+                    print("Couldn't accept connection!")
+                    sys.exit()
+                connectins.append(tmpConn)
+                address.append(tmpAddr)
+                executor.submit(clientresponse, tmpConn, tmpAddr)
+                print(f"Active Clients : {len(address)}")
 
 
 runserver()

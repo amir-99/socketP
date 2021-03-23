@@ -24,7 +24,7 @@ try:
 except socket.error:
     print(f"Unable to connect to server at {myServer}")
     sys.exit()
-print("Connected")
+print("Waiting for server reply!")
 
 #Send Messages to the server!
 #send the headar then the message!
@@ -41,7 +41,6 @@ def msgSend(msg):
 
 #run client
 def clntSend():
-    print ("type in your message.\ntype (dis) to disconnect\n")
     runningStatus = True
     while runningStatus:
         msg = input()

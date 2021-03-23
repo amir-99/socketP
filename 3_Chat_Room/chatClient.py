@@ -57,16 +57,24 @@ def clntRecv(conn, addr):
     while rnClnt:
         try:
             msgLength = conn.recv(szHeader).decode(myFormat)
-        except socket.error or socket.timeout:
+        except socket.error:
             print(f"Unable to recive data from client at {addr}")
+            rnClnt = False
+            continue
+        except socket.timeout:
+            print("Time Out!")
             rnClnt = False
             continue
         if msgLength:
             msgLength = int(msgLength)
             try:
                 msg = conn.recv(msgLength).decode(myFormat)
-            except socket.error or socket.timeout:
+            except socket.error:
                 print(f"Unable to recive data from server at {addr}")
+                rnClnt = False
+                continue
+            except socket.timeout:
+                print("Time Out!")
                 rnClnt = False
                 continue
             print(msg)

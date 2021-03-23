@@ -21,7 +21,10 @@ bndServer.settimeout(maxTimeOut)
 bndServer.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
 try:
     bndServer.bind(myAddr)
-except socket.error or socket.timeout:
+except socket.error:
+    print(f"Couldn't Create the socket at {myAddr}")
+    sys.exit()
+except socket.timeout:
     print(f"Couldn't Create the socket at {myAddr}")
     sys.exit()
 
@@ -72,8 +75,12 @@ def msgrcve(conn, addr):
     opsanity = True
     try:
         msgLength = conn.recv(szHeader).decode(myFormat)
-    except socket.error or socket.timeout:
+    except socket.error:
         print(f"Unable to recive data from client at {addr}")
+        opsanity == False
+        msg = ""
+    except socket.timeout:
+        print(f"Time out!")
         opsanity == False
         msg = ""
     finally:
@@ -81,10 +88,14 @@ def msgrcve(conn, addr):
                 msgLength = int(msgLength)
                 try:
                     msg = conn.recv(msgLength).decode(myFormat)
-                except socket.error or socket.timeout:
+                except socket.error:
                     print(f"Unable to recive data from client at {addr}")
                     opsanity == False
                     msg == ""
+                except socket.timeout:
+                    print(f"Time Out!")
+                    opsanity == False
+                    msg = ""
     return (msg, opsanity)
 
 

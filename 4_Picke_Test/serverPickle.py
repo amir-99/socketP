@@ -67,9 +67,9 @@ def clientresponse(conn, addr):
                     progress = int((len(msg)/msgLength)*10)
                     if progress> mileStone:
                         mileStone = progress
-                        print("*", end="", flush=True)
+                        print(f"...{mileStone*10}%", end="", flush=True)
                     if len(msg) == msgLength:
-                        print(" | done !")
+                        print("...100% | done !")
                         break
 
 

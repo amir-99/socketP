@@ -52,13 +52,13 @@ def clientresponse(conn, addr):
             rnClnt = False
         if msgLength:
             msgLength = int(msgLength)
-            if msgLength>4096:
+            if msgLength>80192:
                 msg = b''
                 mileStone = 0
                 print("reciving image:\n progress: ",end=" ")
                 while True:
                     try:
-                        msgSeg = conn.recv(2048)
+                        msgSeg = conn.recv(8192)
                     except socket.error:
                         print(f"Unable to recive data from client at {addr}")
                         rnClnt = False
@@ -73,7 +73,7 @@ def clientresponse(conn, addr):
                         break
 
 
-                print(f"Message from {addr} with size of {msgLength} :")
+            print(f"Message from {addr} with size of {msgLength} :")
             im = pickle.loads(msg)
             im.show()
             msgsend("dis", conn, addr)

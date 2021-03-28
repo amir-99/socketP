@@ -2,6 +2,8 @@ import socket
 import threading
 import concurrent.futures
 import sys
+from PIL import Image
+import pickle
 
 szHeader = 12   # Default Header Size
 initPort = 4580     # Port number
@@ -9,6 +11,7 @@ myServer = socket.gethostbyname(socket.gethostname())       #get host ip
 myAddr = (myServer, initPort)
 myFormat = "utf-8"  #Coding format
 disMssg = "dis"     #used to dsconnect Client
+picMssg = "pic"     #used to notify picture transmission
 maxTimeOut = 3600   #one hour
 
 
@@ -59,6 +62,9 @@ def clientresponse(conn, addr):
             if msg == disMssg:
                 rnClnt == False
                 break
+            elif msg == picMssg:
+                msgBroadCast(f"{name} is uploading a pic !", conn)
+                picRcv(conn, addr, name)
             msg = f"{name} : " + msg
             msgBroadCast(msg, conn)
 
@@ -110,6 +116,45 @@ def msgsend(msg, connClient, addrClient):
         sys.exit()
 
 
+def picRcv(conn, addr, name):
+    try:
+        msgLength = conn.recv(szHeader).decode(myFormat)
+    except socket.error:
+        print(f"Unable to recive data from client at {addr}")
+        sys.exit()
+    except socket.timeout:
+        print("Time Out!")
+        sys.exit()
+    if msgLength:
+        msgLength = int(msgLength)
+        print(f"reciving picture from {name}, size = {msgLength/(1024*1024)}MiB")
+        if msgLength>8192:
+            msg = b''
+            mileStone = 0
+            print("reciving image:\n progress: ",end=" ")
+            while True:
+                try:
+                    msgSeg = conn.recv(80192)
+                except socket.error:
+                    print(f"Unable to recive picture from client at {addr}")
+                    continue
+                msg += msgSeg
+                progress = int((len(msg)/msgLength)*10)
+                if progress> mileStone:
+                    mileStone = progress
+                    print(f"...{mileStone*10}%", end="", flush=True)
+                if len(msg) == msgLength:
+                    print("...100% | done !")
+                    msgsend("pic uploaded to server! broadcast in progress !", conn, addr)
+                
+                    msgBroadCast(picMssg, conn)
+                    picBroadCast(msg, conn)
+
+                    
+
+
+
+
 def msgBroadCast(msg, connClient):
     msg = msg.encode(myFormat)
     sendLength = f'{len(msg):<{szHeader}}'.encode(myFormat)
@@ -121,6 +166,19 @@ def msgBroadCast(msg, connClient):
             except socket.error:
                 print(f"Unable to send data to client at : {address[index]}")
                 sys.exit()
+
+
+def picBroadCast(img, connClient):
+    sendLength = f'{len(img):<{szHeader}}'.encode(myFormat)
+    for index, conn in enumerate(connectins):
+        if conn != connClient:
+            try:
+                conn.send(sendLength)
+                conn.send(img)
+            except socket.error:
+                print(f"Unable to send pic to client at : {address[index]}")
+                sys.exit()
+
 
 def serverhandle(executor):
     handle = input()

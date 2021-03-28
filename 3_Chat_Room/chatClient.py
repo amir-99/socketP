@@ -2,6 +2,8 @@ import socket
 import sys
 import threading
 import time
+from PIL import Image
+import pickle
 
 szHeader = 12   # Default Header Size
 initPort = 4580     # Port number
@@ -9,6 +11,7 @@ myServer = "127.0.0.1"
 myAddr = (myServer, initPort)
 myFormat = "utf-8"  #Coding format
 disMssg = "dis"     #used to dsconnect Client
+picMssg = "pic"     #used to notify picture transmission
 maxTimeOut = 3600   #one hour
 
 
@@ -32,12 +35,27 @@ def msgSend(msg):
     msg = msg.encode(myFormat)
     sendLength = f'{len(msg):<{szHeader}}'.encode(myFormat)
     try:
-        myClient.send(sendLength)
-        myClient.send(msg)
+        myClient.sendall(sendLength)
+        myClient.sendall(msg)
     except socket.error:
         print("Unable to send data to server")
         sys.exit()
 
+
+def sendpic():
+    loc = input("Enter the picture location :")
+    im = Image.open(loc)
+    msg = pickle.dumps(im)
+    if len(msg):
+        sendLength = f'{len(msg):<{szHeader}}'.encode(myFormat)
+        try:
+            myClient.sendall(sendLength)
+            myClient.sendall(msg)
+        except socket.error:
+            print("Unable to send picture to server")
+            sys.exit()
+        finally:
+            print("sent image")    
 
 #run client
 def clntSend():
@@ -46,10 +64,48 @@ def clntSend():
         msg = input()
         if len(msg):
             msgSend(msg)
-            if msg == disMssg:
+            if msg == picMssg:
+                sendpic()
+            elif msg == disMssg:
+                msgSend(msg)
                 runningStatus = False
             time.sleep(0.01)    # use delay to make sure the response arrives first
 
+
+#Recive Picture From Server !
+def picRcv(conn, addr):
+    try:
+        msgLength = conn.recv(szHeader).decode(myFormat)
+    except socket.error:
+        print(f"Unable to recive data from client at {addr}")
+        sys.exit()
+    except socket.timeout:
+        print("Time Out!")
+        sys.exit()
+    if msgLength:
+        msgLength = int(msgLength)
+        print(f"reciving picture with size of = {round(msgLength/(1024*1024), 2)}MiB")
+        if msgLength>8192:
+            msg = b''
+            mileStone = 0
+            print("reciving image:\n progress: ",end=" ")
+            while True:
+                try:
+                    msgSeg = conn.recv(80192)
+                except socket.error:
+                    print(f"Unable to recive picture from client at {addr}")
+                    continue
+                msg += msgSeg
+                progress = int((len(msg)/msgLength)*10)
+                if progress> mileStone:
+                    mileStone = progress
+                    print(f"...{mileStone*10}%", end="", flush=True)
+                if len(msg) == msgLength:
+                    print("...100% | done !", flush=True)
+                    break
+            img = pickle.loads(msg)
+            return img
+                
 
 #recive data from server
 def clntRecv(conn, addr):
@@ -78,7 +134,12 @@ def clntRecv(conn, addr):
                 rnClnt = False
                 continue
             print(msg)
-            if msg == disMssg:
+            if msg == picMssg:
+                im = picRcv(conn, addr)
+                inA = input ("do you want to see the image(y/n) :")
+                if inA == "y":
+                    im.show()
+            elif msg == disMssg:
                 rnClnt = False
 
 # make a thread for receving data from server

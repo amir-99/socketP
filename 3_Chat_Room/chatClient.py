@@ -43,8 +43,15 @@ def msgSend(msg):
 
 
 def sendpic():
-    loc = input("Enter the picture location :")
-    im = Image.open(loc)
+    flag = True
+    while flag:
+        loc = input("Enter the picture location :")
+        flag = False
+        try:
+            im = Image.open(loc)
+        except Exception :
+            print("Unable to read from the specified directory try again !")
+            flag = True
     msg = pickle.dumps(im)
     if len(msg):
         sendLength = f'{len(msg):<{szHeader}}'.encode(myFormat)

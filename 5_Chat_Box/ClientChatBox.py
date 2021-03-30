@@ -10,8 +10,9 @@ from PIL import Image
 C_FORMAT = "utf-8"
 HEADER_LENGTH = 12
 
-TXT_FLAG = 0
-PIC_FLAG = 1
+TXT_FLAG = "___PIC___"
+PIC_FLAG = "___TXT___"
+DIS_FLAG = "___DIS___"
 
 running_stat = True
 
@@ -79,6 +80,8 @@ def recv_msg(conn):
 
 
 def sen_handler(conn):
+    global running_stat
+    
     while running_stat:
         msg = input("->")
         if msg:
@@ -99,6 +102,9 @@ def sen_handler(conn):
                             send_msg(conn, im, encoding=False)
                     else:
                         break
+            elif msg == "dis":
+                send_msg(conn, DIS_FLAG)
+                running_stat = False
             else:
                 send_msg(conn, msg)
 

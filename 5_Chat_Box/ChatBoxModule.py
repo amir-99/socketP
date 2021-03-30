@@ -10,8 +10,9 @@ from PIL import Image
 C_FORMAT = "utf-8"
 HEADER_LENGTH = 12
 
-TXT_FLAG = 0
-PIC_FLAG = 1
+TXT_FLAG = "___PIC___"
+PIC_FLAG = "___TXT___"
+DIS_FLAG = "___DIS___"
 
 
 class Client:
@@ -73,8 +74,15 @@ class Client:
                         self.broadcast_msg(new_msg, PIC_FLAG)
                     else:
                         new_msg = self.rcv_msg()
-                        new_msg = f"{self.name} : " + new_msg
-                        self.broadcast_msg(new_msg)
+                        if new_msg == DIS_FLAG:
+                            self.client_running_stat == False
+                            print(f"{self.name} left !")
+                            self.broadcast_msg(f"{self.name} lef the chat !")
+                            print(f"Active clients : {len(self.linked_server.Clients)-1}")
+                            self.linked_server.Clients.remove(self)
+                        else:
+                            new_msg = f"{self.name} : " + new_msg
+                            self.broadcast_msg(new_msg)
             try:
                 flag, msg = self.msgQueue.get_nowait()
                 if flag == TXT_FLAG:

@@ -150,10 +150,6 @@ def picRcv(conn, addr, name):
                     msgBroadCast(picMssg, conn)
                     picBroadCast(msg, conn)
 
-                    
-
-
-
 
 def msgBroadCast(msg, connClient):
     msg = msg.encode(myFormat)
@@ -187,6 +183,7 @@ def serverhandle(executor):
     else:
         pass
 
+
 def listconnections():
     print(f"currently {len(address)} active connections.")
     for name, add in zip(names, address):
@@ -211,4 +208,5 @@ def runserver():
                 print(f"Active Clients : {len(address)}")
 
 
-runserver()
+if __name__ == "__main__":
+    runserver()

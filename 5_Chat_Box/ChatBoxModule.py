@@ -10,8 +10,8 @@ from PIL import Image
 C_FORMAT = "utf-8"
 HEADER_LENGTH = 12
 
-TXT_FLAG = "___PIC___"
-PIC_FLAG = "___TXT___"
+TXT_FLAG = "___TXT___"
+PIC_FLAG = "___PIC___"
 DIS_FLAG = "___DIS___"
 
 

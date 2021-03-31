@@ -6,12 +6,13 @@ import socket
 from queue import Queue
 import select
 from PIL import Image
+import time
 
 C_FORMAT = "utf-8"
 HEADER_LENGTH = 12
 
-TXT_FLAG = "___PIC___"
-PIC_FLAG = "___TXT___"
+TXT_FLAG = "___TXT___"
+PIC_FLAG = "___PIC___"
 DIS_FLAG = "___DIS___"
 
 running_stat = True
@@ -74,7 +75,7 @@ def recv_msg(conn):
                             next_msg = msg.decode(C_FORMAT)
             if next_msg:
                 if previous_msg == PIC_FLAG:
-                    next_msg.show()
+                    next_msg.save(f"recivedimages/{time.time()}.png")
                 else:
                     print(next_msg)
 
@@ -109,7 +110,7 @@ def sen_handler(conn):
                 send_msg(conn, msg)
 
 def run_client():
-    SERVER_ADDR = "127.0.0.1"
+    SERVER_ADDR = "192.168.1.10"
     SERVER_PORT = 4580
     SERVER = (SERVER_ADDR, SERVER_PORT)
     chat_client = socket.socket(socket.AF_INET, socket.SOCK_STREAM)

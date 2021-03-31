@@ -197,7 +197,7 @@ class Server:
 
 
 if __name__ == "__main__":
-    host_addr = "127.0.0.1"
+    host_addr = "192.168.1.10"
     host_port = 4580
     set_blocking = False
     reuse_stat = True

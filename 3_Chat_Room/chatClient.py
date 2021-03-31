@@ -111,7 +111,7 @@ def picRcv(conn, addr):
                     print("...100% | done !", flush=True)
                     break
             img = pickle.loads(msg)
-            return img
+
                 
 
 #recive data from server
@@ -142,10 +142,7 @@ def clntRecv(conn, addr):
                 continue
             print(msg)
             if msg == picMssg:
-                im = picRcv(conn, addr)
-                inA = input ("do you want to see the image(y/n) :")
-                if inA == "y":
-                    im.show()
+                picRcv(conn, addr)
             elif msg == disMssg:
                 rnClnt = False
 

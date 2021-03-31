@@ -5,12 +5,14 @@ import time
 import socket
 from queue import Queue
 import select
+from PIL import Image
 
 C_FORMAT = "utf-8"
 HEADER_LENGTH = 12
 
-TXT_FLAG = 0
-PIC_FLAG = 1
+TXT_FLAG = "___PIC___"
+PIC_FLAG = "___TXT___"
+DIS_FLAG = "___DIS___"
 
 
 class Client:
@@ -32,7 +34,7 @@ class Client:
         send_length = f'{len(msg):<{HEADER_LENGTH}}'.encode(C_FORMAT)
         try:
             self._conn.sendall(send_length)
-            self._conn.sendall(send_length)
+            self._conn.sendall(msg)
         except socket.error:
             return 2
         else:
@@ -55,13 +57,13 @@ class Client:
             for client_inst in self.linked_server.Clients:
                 if tmp_name == client_inst.name:
                     stat = False
+                    self.send_msg("Name taken !")
                     break
             if stat:
-                self.send_msg("Name taken !")
                 self.name = tmp_name
-
+        self.send_msg(f"joined as {self.name}")
         new_msg = None
-        while running_stat & self.client_running_stat:
+        while self.running_stat & self.client_running_stat:
             readable, _, _ = select.select(inputs, outputs, outputs)
             for con in readable:
                 if con == self._conn:
@@ -72,20 +74,28 @@ class Client:
                         self.broadcast_msg(new_msg, PIC_FLAG)
                     else:
                         new_msg = self.rcv_msg()
-                        new_msg = f"{self.name} : " + new_msg
-                        self.broadcast_msg(new_msg)
+                        if new_msg == DIS_FLAG:
+                            self.client_running_stat == False
+                            print(f"{self.name} left !")
+                            self.broadcast_msg(f"{self.name} lef the chat !")
+                            print(f"Active clients : {len(self.linked_server.Clients)-1}")
+                            self.linked_server.Clients.remove(self)
+                        else:
+                            new_msg = f"{self.name} : " + new_msg
+                            self.broadcast_msg(new_msg)
             try:
                 flag, msg = self.msgQueue.get_nowait()
-            except Queue.Empty:
-                pass
-            else:
                 if flag == TXT_FLAG:
                     self.send_msg(msg)
                 elif flag == PIC_FLAG:
                     self.send_msg(msg, encoding=False)
+            except Exception:
+                pass
+
 
     def rcv_msg(self, flag=TXT_FLAG):
         msg_length = self._conn.recv(HEADER_LENGTH)
+        msg_length = msg_length.decode(C_FORMAT)
         msg_length = int(msg_length.strip())
         if msg_length:
             if msg_length > 8192:

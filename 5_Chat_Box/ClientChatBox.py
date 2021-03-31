@@ -5,12 +5,14 @@ import time
 import socket
 from queue import Queue
 import select
+from PIL import Image
 
 C_FORMAT = "utf-8"
 HEADER_LENGTH = 12
 
-TXT_FLAG = 0
-PIC_FLAG = 1
+TXT_FLAG = "___PIC___"
+PIC_FLAG = "___TXT___"
+DIS_FLAG = "___DIS___"
 
 running_stat = True
 
@@ -21,7 +23,7 @@ def send_msg(conn, msg, encoding=True):
     send_length = f'{len(msg):<{HEADER_LENGTH}}'.encode(C_FORMAT)
     try:
         conn.sendall(send_length)
-        conn.sendall(send_length)
+        conn.sendall(msg)
     except socket.error:
         return 2
     else:
@@ -77,6 +79,35 @@ def recv_msg(conn):
                     print(next_msg)
 
 
+def sen_handler(conn):
+    global running_stat
+    
+    while running_stat:
+        msg = input("->")
+        if msg:
+            if msg == PIC_FLAG:
+                print("Enter the picture location (c to cancel) :")
+                flag = False
+                while not flag:
+                    loc = input(">>>")
+                    if loc != "c":
+                        try:
+                            im = Image.open(loc)
+                        except Exception:
+                            print("wrong directory ! try again (c to cancel) ")
+                            flag = True
+                        else:
+                            im = pickle.dumps(im)
+                            send_msg(conn, PIC_FLAG)
+                            send_msg(conn, im, encoding=False)
+                    else:
+                        break
+            elif msg == "dis":
+                send_msg(conn, DIS_FLAG)
+                running_stat = False
+            else:
+                send_msg(conn, msg)
+
 def run_client():
     SERVER_ADDR = "127.0.0.1"
     SERVER_PORT = 4580
@@ -97,31 +128,10 @@ def run_client():
         sys.exit()
 
     with concurrent.futures.ThreadPoolExecutor() as Executor:
-        Executor.submit(recv_msg)
-
+        Executor.submit(recv_msg, chat_client)
+        Executor.submit(sen_handler, chat_client)
     while running_stat:
-        msg = input("->")
-        if msg:
-            if msg == PIC_FLAG:
-                print("Enter the picture location (c to cancel) :")
-                flag = False
-                while not flag:
-                    loc = input(">>>")
-                    if loc != c:
-                        try:
-                            im = Image.open(loc)
-                        except Exception:
-                            print("wrong directory ! try again (c to cancel) ")
-                            flag = True
-                        else:
-                            msg = pickle.dumps(im)
-                            send_msg(PIC_FLAG)
-                            send_msg(msg, encoding=False)
-                    else:
-                        break
-            else:
-                send_msg(msg)
-
+        pass
 
 if __name__ == "__main__":
     run_client()

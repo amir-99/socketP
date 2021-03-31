@@ -88,19 +88,18 @@ def sen_handler(conn):
         if msg:
             if msg == PIC_FLAG:
                 print("Enter the picture location (c to cancel) :")
-                flag = False
-                while not flag:
+                while True:
                     loc = input(">>>")
                     if loc != "c":
                         try:
                             im = Image.open(loc)
-                        except Exception:
-                            print("wrong directory ! try again (c to cancel) ")
-                            flag = True
-                        else:
                             im = pickle.dumps(im)
                             send_msg(conn, PIC_FLAG)
                             send_msg(conn, im, encoding=False)
+                            print("Sent the specifaied image to server")
+                            break
+                        except Exception:
+                            print("wrong directory ! try again (c to cancel) ")
                     else:
                         break
             elif msg == "dis":

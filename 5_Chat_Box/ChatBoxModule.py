@@ -98,11 +98,17 @@ class Client:
         msg_length = int(msg_length.strip())
         if msg_length:
             if msg_length > 8192:
+                print(f"reciving large message from {self.name}")
+                milestone = 0
                 msg = b''
                 while True:
                     try:
                         tmp_msg = self._conn.recv(8192)
                         msg += tmp_msg
+                        prog = int(len(msg)/msg_length)
+                        if prog > milestone:
+                            milestone = prog
+                            print(f"{milestone*10}%...", end="", flush=True)
                         if len(msg) == msg_length:
                             break
                     except socket.error:
@@ -118,6 +124,7 @@ class Client:
                     return None
             if flag == PIC_FLAG:
                 msg = pickle.loads(msg)
+                msg.save(f"recivedimages/{self.name}{time.time()}.png")
             elif flag == TXT_FLAG:
                 msg = msg.decode(C_FORMAT)
         return msg

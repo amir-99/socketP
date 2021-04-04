@@ -47,11 +47,16 @@ def recv_msg(conn):
             if msg_length:
                 previous_msg = next_msg
                 if msg_length > 8192:
+                    print("reciving large message")
+                    milestone = 0
                     next_msg = b''
                     while True:
                         try:
                             tmp_msg = conn.recv(8192)
                             next_msg += tmp_msg
+                            if prog > milestone:
+                                milestone = prog
+                                print(f"{milestone*10}%...", end="", flush=True)
                             if len(next_msg) == msg_length:
                                 break
                         except socket.error:

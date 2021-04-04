@@ -1,2 +1,2 @@
-ntplib
-pillow
+ntplib==0.3.4
+Pillow==8.2.0

@@ -38,6 +38,7 @@ def recv_msg(conn):
     while running_stat:
         try:
             msg_length = conn.recv(HEADER_LENGTH)
+            msg_length = msg_length.decode(C_FORMAT)
         except socket.error:
             print("Unable to receive data!")
             sys.exit()
@@ -45,22 +46,17 @@ def recv_msg(conn):
             msg_length = int(msg_length.strip())
             if msg_length:
                 previous_msg = next_msg
-                if msg_length>8192:
-                    msg = b''
-                    receiving = True
-                    while receiving:
+                if msg_length > 8192:
+                    next_msg = b''
+                    while True:
                         try:
                             tmp_msg = conn.recv(8192)
-                            msg += tmp_msg
-                            if len(msg) == msg_length:
-                                receiving = False
-                                if previous_msg == PIC_FLAG:
-                                    next_msg = pickle.loads(msg)
-                                else:
-                                    next_msg = msg.decode(C_FORMAT)
+                            next_msg += tmp_msg
+                            if len(next_msg) == msg_length:
+                                break
                         except socket.error:
                             print("unable to receive message from server")
-                            running_stat = False
+                            break
                 else:
                     previous_msg = next_msg
                     try:
@@ -68,21 +64,17 @@ def recv_msg(conn):
                     except socket.error:
                         print("unable to receive message from server")
                         running_stat = False
-                    else:
-                        if previous_msg == PIC_FLAG:
-                            next_msg = pickle.loads(msg)
-                        else:
-                            next_msg = msg.decode(C_FORMAT)
-            if next_msg:
+            if msg:
                 if previous_msg == PIC_FLAG:
+                    next_msg = pickle.loads(msg)
                     next_msg.save(f"recivedimages/{time.time()}.png")
                 else:
+                    next_msg = msg.decode(C_FORMAT)
                     print(next_msg)
 
 
 def sen_handler(conn):
     global running_stat
-    
     while running_stat:
         msg = input("->")
         if msg:
@@ -108,6 +100,7 @@ def sen_handler(conn):
             else:
                 send_msg(conn, msg)
 
+
 def run_client():
     SERVER_ADDR = "192.168.1.10"
     SERVER_PORT = 4580
@@ -132,6 +125,7 @@ def run_client():
         Executor.submit(sen_handler, chat_client)
     while running_stat:
         pass
+
 
 if __name__ == "__main__":
     run_client()

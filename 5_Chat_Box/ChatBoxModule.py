@@ -75,7 +75,7 @@ class Client:
                     else:
                         new_msg = self.rcv_msg()
                         if new_msg == DIS_FLAG:
-                            self.client_running_stat == False
+                            self.client_running_stat = False
                             print(f"{self.name} left !")
                             self.broadcast_msg(f"{self.name} lef the chat !")
                             print(f"Active clients : {len(self.linked_server.Clients)-1}")
@@ -92,7 +92,6 @@ class Client:
             except Exception:
                 pass
 
-
     def rcv_msg(self, flag=TXT_FLAG):
         msg_length = self._conn.recv(HEADER_LENGTH)
         msg_length = msg_length.decode(C_FORMAT)
@@ -100,19 +99,12 @@ class Client:
         if msg_length:
             if msg_length > 8192:
                 msg = b''
-                receiving = True
-                while receiving:
+                while True:
                     try:
                         tmp_msg = self._conn.recv(8192)
                         msg += tmp_msg
                         if len(msg) == msg_length:
-                            receiving = False
-                            if flag == TXT_FLAG:
-                                return msg.decode(C_FORMAT)
-                            if flag == PIC_FLAG:
-                                return msg
-                            else:
-                                return None
+                            break
                     except socket.error:
                         print(f"unable to receive message from client {self._addr}. Closing Connection")
                         self.client_running_stat = False
@@ -120,16 +112,15 @@ class Client:
             else:
                 try:
                     msg = self._conn.recv(msg_length)
-                    if flag == TXT_FLAG:
-                        return msg.decode(C_FORMAT)
-                    elif flag == PIC_FLAG:
-                        return msg
-                    else:
-                        return None
                 except socket.error:
                     print(f"unable to receive message from client {self._addr}. Closing Connection")
                     self.client_running_stat = False
                     return None
+            if flag == PIC_FLAG:
+                msg = pickle.loads(msg)
+            elif flag == TXT_FLAG:
+                msg = msg.decode(C_FORMAT)
+        return msg
 
     def broadcast_msg(self, msg, flag=TXT_FLAG):
         for client_inst in self.linked_server.Clients:
@@ -158,7 +149,6 @@ class Server:
 
         self.Clients = list()
         self.running_status = True
-
 
     def bind(self):
         try:

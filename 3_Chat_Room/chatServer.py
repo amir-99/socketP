@@ -7,7 +7,7 @@ import pickle
 
 szHeader = 12   # Default Header Size
 initPort = 4580     # Port number
-myServer = socket.gethostbyname(socket.gethostname())       #get host ip
+myServer = "192.168.1.10"      #get host ip
 myAddr = (myServer, initPort)
 myFormat = "utf-8"  #Coding format
 disMssg = "dis"     #used to dsconnect Client

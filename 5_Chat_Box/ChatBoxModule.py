@@ -1,5 +1,4 @@
 import concurrent.futures
-import sys
 import pickle
 import time
 import socket
@@ -31,6 +30,8 @@ class Client:
     def send_msg(self, msg, encoding=True):
         if encoding:
             msg = msg.encode(C_FORMAT)
+        else:
+            msg = pickle.dumps(msg)
         send_length = f'{len(msg):<{HEADER_LENGTH}}'.encode(C_FORMAT)
         try:
             self._conn.sendall(send_length)

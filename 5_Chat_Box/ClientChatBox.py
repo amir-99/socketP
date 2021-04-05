@@ -54,6 +54,7 @@ def recv_msg(conn):
                         try:
                             tmp_msg = conn.recv(8192)
                             next_msg += tmp_msg
+                            prog = int(len(next_msg)/msg_length)
                             if prog > milestone:
                                 milestone = prog
                                 print(f"{milestone*10}%...", end="", flush=True)

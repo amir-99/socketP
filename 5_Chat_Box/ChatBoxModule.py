@@ -63,6 +63,7 @@ class Client:
             if stat:
                 self.name = tmp_name
         self.send_msg(f"joined as {self.name}")
+        self.broadcast_msg(f"{self.name} has joined the chat!")
         new_msg = None
         while self.running_stat & self.client_running_stat:
             readable, _, _ = select.select(inputs, outputs, outputs)

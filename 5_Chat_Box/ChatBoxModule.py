@@ -5,6 +5,7 @@ import socket
 from queue import Queue
 import select
 from PIL import Image
+import os
 
 C_FORMAT = "utf-8"
 HEADER_LENGTH = 12
@@ -125,7 +126,7 @@ class Client:
                     return None
             if flag == PIC_FLAG:
                 msg = pickle.loads(msg)
-                msg.save(f"recivedimages/{self.name}{time.time()}.png")
+                msg.save(os.path.join(os.getcwd(), "recivedimages", f"{self.name}_{time.time()}.jpg"))
             elif flag == TXT_FLAG:
                 msg = msg.decode(C_FORMAT)
         return msg

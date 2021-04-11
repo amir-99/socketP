@@ -7,6 +7,7 @@ from queue import Queue
 import select
 from PIL import Image
 import time
+import os
 
 C_FORMAT = "utf-8"
 HEADER_LENGTH = 12
@@ -73,7 +74,7 @@ def recv_msg(conn):
             if msg:
                 if previous_msg == PIC_FLAG:
                     next_msg = pickle.loads(msg)
-                    next_msg.save(f"recivedimages/{time.time()}.png")
+                    next_msg.save(os.path.join(os.getcwd(), "recivedimages", f"pic_{time.time()}.jpg"))
                 else:
                     next_msg = msg.decode(C_FORMAT)
                     print(next_msg)

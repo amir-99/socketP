@@ -142,7 +142,7 @@ class ObjectiveClient:
                 pass
 
     def runclient(self):
-        with concurrent.futures.ThreadPoolExecutor as Executor:
+        with concurrent.futures.ThreadPoolExecutor() as Executor:
             Executor.submit(self.get_input)
             Executor.submit(self.handle_client)
         while self.running_stat:
@@ -153,7 +153,7 @@ def main():
     addr = "192.168.1.10"
     port = 4580
     client = ObjectiveClient(addr, port)
-    client.runclient
+    client.runclient()
 
 
 if __name__ == "__main__":

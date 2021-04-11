@@ -1,5 +1,9 @@
 # socketP
-socket programming files , 
+
+trying to learn socket programming in python !
+
+
+socket programming files ,
     1_Simple_Message:
         simpe echo server and client
     2_NTP_client

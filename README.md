@@ -1,7 +1,7 @@
 # Socket Programming
-## Examples in Socket Programming in python
+### Examples in Socket Programming in python
 
-trying to learn socket programming in python !
+#### __The files are intended to be used as stand alone scripts, not as a python module.__
 
 __included files__ :
 * 1_Simple_Message:
@@ -16,3 +16,5 @@ __included files__ :
 >a more refined chat box
 ---
 ip address needs to be modified in each file.
+
+__An endeavor to learn socket programming in python!__
